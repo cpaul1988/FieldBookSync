@@ -37,17 +37,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          cat release/v8.1.18/v8118_minipkg.b64.part* | base64 -d > v8118_minipkg.tar.xz
+          echo '0b2d4b601a7b769eaed3b518b2c9ba8d8d950374425cdfc7b468ffc440708173  v8118_minipkg.tar.xz' | sha256sum -c -
+          mkdir mini
+          tar -xJf v8118_minipkg.tar.xz -C mini
+
           python release/v8.1.14/extract_payload.py base-8.1.14.exe payload
-          mkdir overlay
-          unzip -q release/v8.1.18/v8118_overlay.zip -d overlay
-          cp -a overlay/payload/. payload/
+          xz -dc mini/v8118_payload.patch.xz | patch -p1 -d payload
           while IFS= read -r rel; do
             [ -z "$rel" ] && continue
             rm -f "payload/$rel"
-          done < overlay/remove.txt
+          done < mini/remove.txt
 
           GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags '-H=windowsgui -s -w' \
-            -o payload/FieldBookSync.exe overlay/build_src/app_launcher.go
+            -o payload/FieldBookSync.exe mini/build_src/app_launcher.go
 
       - name: Verify payload byte-for-byte against reviewed manifest
         shell: bash
@@ -119,7 +122,7 @@ jobs:
                       z.write(p, p.relative_to(root).as_posix())
           print(dest, dest.stat().st_size)
           PY
-          cp overlay/build_src/bootstrapper_main.go build/bootstrapper_main.go
+          cp mini/build_src/bootstrapper_main.go build/bootstrapper_main.go
           cd build
           GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags '-H=windowsgui -s -w' \
             -o FieldBookSync_Setup_8.1.18.exe bootstrapper_main.go
@@ -142,9 +145,9 @@ jobs:
           - Adds an in-app Bug Report / Feature Request wizard with append-only local feedback logs and shared-tracker sync status.
           - Adds first-class CNA (Could Not Access) and CNL (Could Not Locate) dip statuses throughout analysis, review, search, and exports.
           - Keeps Global Mapper as an optional compatibility converter while native FieldBook Sync Map support remains preferred.
-          - Adds startup timing diagnostics to make any future startup stalls traceable.
+          - Adds startup timing diagnostics to make future startup stalls traceable.
 
-          The reviewed v8.1.18 candidate passed 233/233 automated tests before publication. The release pipeline additionally verifies the reconstructed application payload byte-for-byte against the reviewed payload manifest before building the installer.
+          The reviewed v8.1.18 candidate passed 233/233 automated tests before publication. The release pipeline also reconstructs and verifies the application payload byte-for-byte against the reviewed payload manifest before building the public installer.
           EOF
           cd build
           if gh release view v8.1.18 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
