@@ -19,28 +19,72 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
+          cache: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Download v8.1.13 base installer
+      - name: Download verified v8.1.12 base installer
         shell: bash
         run: |
           set -euo pipefail
           curl -fL --retry 4 --retry-delay 2 \
-            'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.13/FieldBookSync_Setup_8.1.13.exe' \
-            -o base-8.1.13.exe
-          echo 'e0dbdd0fb0b57eca8bb4bc82e00f609fbd6669b487820fff8e97b2d50260e314  base-8.1.13.exe' | sha256sum -c -
+            'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.12/FieldBookSync_Setup_8.1.12.exe' \
+            -o base-8.1.12.exe
+          echo 'a62499687ad2772f298f4b97e92a726e4fedb564fbf060add928876d4d7a4c4c  base-8.1.12.exe' | sha256sum -c -
 
       - name: Reconstruct v8.1.14 payload
         shell: bash
         run: |
           set -euo pipefail
-          python release/v8.1.14/extract_payload.py base-8.1.13.exe payload
+          python release/v8.1.14/extract_payload.py base-8.1.12.exe payload
+          cat release/v8.1.14/v8113_patch.b64.part* > v8113_patch.b64
+          python - <<'PY'
+          from pathlib import Path
+          import base64, zlib
+          encoded = Path('v8113_patch.b64').read_text(encoding='ascii')
+          Path('v8113.patch').write_bytes(zlib.decompress(base64.b64decode(encoded)))
+          PY
+          patch -d payload -p1 < v8113.patch
+
+          # The compatibility patch intentionally contains only meaningful source
+          # changes. Normalize the remaining v8.1.12 version markers to v8.1.13 so
+          # the already-reviewed v8.1.14 patcher can apply exactly as designed.
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('payload')
+          for rel in [
+              'VERSION.txt','fieldbook_sync/__init__.py','fieldbook_sync/app.py',
+              'fieldbook_sync/static/index.html','fieldbook_sync/static/app.js',
+              'installer/setup_ui.ps1','installer/provision_runtime.ps1','README.md',
+          ]:
+              p=root/rel
+              text=p.read_text(encoding='utf-8')
+              p.write_text(text.replace('8.1.12','8.1.13').replace('8_1_12','8_1_13'),encoding='utf-8')
+          launcher=root/'FieldBookSync.exe'
+          data=launcher.read_bytes()
+          if b'8.1.12' not in data:
+              raise SystemExit('v8.1.12 launcher marker was not found')
+          launcher.write_bytes(data.replace(b'8.1.12',b'8.1.13'))
+          PY
+
           python release/v8.1.14/patch_payload.py payload
-          python -m py_compile payload/fieldbook_sync/app.py
+          sed -i 's/8\.1\.13/8.1.14/g; s/8_1_13/8_1_14/g' payload/installer/app_launcher.go
+
+          # The compatibility patch restores the v8.1.13 updater source. Build
+          # it again as v8.1.14 so the installed application keeps the hardened
+          # pre-launch installer SHA/size/MZ verification.
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags '-H=windowsgui -s -w' \
+            -o payload/FieldBookSync.exe payload/installer/app_launcher.go
+
+          python -m py_compile payload/fieldbook_sync/app.py payload/fieldbook_sync/models.py payload/fieldbook_sync/rod_height_qc.py
           node --check payload/fieldbook_sync/static/app.js
-          test "$(cat payload/VERSION.txt | tr -d '\r\n')" = '8.1.14'
+          test "$(tr -d '\r\n' < payload/VERSION.txt)" = '8.1.14'
+          grep -q 'pause_requested' payload/fieldbook_sync/models.py
+          test -f payload/fieldbook_sync/rod_height_qc.py
+          grep -q 'pending installer SHA-256 changed after verification' payload/installer/app_launcher.go
+          grep -q 'Report Bug / Request Feature' payload/fieldbook_sync/static/index.html
+          grep -q 'copySupportInfo' payload/fieldbook_sync/static/app.js
 
       - name: Build embedded payload and Setup EXE
         shell: bash
@@ -59,7 +103,7 @@ jobs:
           PY
           cp release/v8.1.14/bootstrapper_main.go build/bootstrapper_main.go
           cd build
-          GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-H=windowsgui -s -w' \
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags '-H=windowsgui -s -w' \
             -o FieldBookSync_Setup_8.1.14.exe bootstrapper_main.go
           sha256sum FieldBookSync_Setup_8.1.14.exe > FieldBookSync_Setup_8.1.14.exe.sha256
           test "$(head -c2 FieldBookSync_Setup_8.1.14.exe)" = 'MZ'
