@@ -1,0 +1,49 @@
+name: Bootstrap v8.1.9 Release
+
+on:
+  push:
+    paths:
+      - '.github/workflows/bootstrap-v819-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download v8.1.9 installer from legacy Drive host
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            'https://drive.usercontent.google.com/download?id=11sK1geSLX4N_WIpmADuQOBtGXItqwrzp&export=download&confirm=t' \
+            -o FieldBookSync_Setup_8.1.9.exe
+          test "$(stat -c%s FieldBookSync_Setup_8.1.9.exe)" -eq 6282240
+          echo '01167d0fa47312ce4b7308211a55d0dfd1290c4af052ecfd53ab0f292baedf83  FieldBookSync_Setup_8.1.9.exe' | sha256sum -c -
+
+      - name: Write checksum asset
+        shell: bash
+        run: |
+          echo '01167d0fa47312ce4b7308211a55d0dfd1290c4af052ecfd53ab0f292baedf83  FieldBookSync_Setup_8.1.9.exe' > FieldBookSync_Setup_8.1.9.exe.sha256
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v8.1.9 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v8.1.9 \
+              FieldBookSync_Setup_8.1.9.exe \
+              FieldBookSync_Setup_8.1.9.exe.sha256 \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create v8.1.9 \
+              FieldBookSync_Setup_8.1.9.exe \
+              FieldBookSync_Setup_8.1.9.exe.sha256 \
+              --repo "$GITHUB_REPOSITORY" \
+              --title 'FieldBook Sync v8.1.9' \
+              --notes "Hotfix release. Restores Code Profile loading/import refresh after the v8.1.8 AI runtime changes. Fixes 'loadProfiles is not defined' for CSV/Excel code profile imports and refresh after save/delete/project open."
+          fi
