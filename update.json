@@ -1,11 +1,11 @@
 {
-    "version":  "8.1.18",
-    "channel":  "stable",
-    "file":  "FieldBookSync_Setup_8.1.18.exe",
-    "download_url":  "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.18/FieldBookSync_Setup_8.1.18.exe",
-    "size_bytes":  6488064,
-    "sha256":  "ad0f37e974546bbc29a7a9eb6317d8ca970121a628f1de4f81e7d696eb6be5b6",
-    "publisher":  "Clever Bird Development",
-    "required":  false,
-    "release_notes":  "Fixes the Windows startup/Continue freeze, adds the in-app feedback wizard and local feedback logs, adds CNA/CNL dip statuses, and improves startup diagnostics and responsiveness."
+  "version": "8.1.19",
+  "channel": "stable",
+  "file": "FieldBookSync_Setup_8.1.19.exe",
+  "download_url": "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.19/FieldBookSync_Setup_8.1.19.exe",
+  "size_bytes": 6648320,
+  "sha256": "e7d6155411d85de8d2d2abb96ea485a736e9003bde90db2566bb463229313fd8",
+  "publisher": "Clever Bird Development",
+  "required": false,
+  "release_notes": "Fixes the in-app updater handoff getting stuck on Closing for update. Adds native shutdown-event watching, an explicit native exit fallback, and update-staging diagnostics. Users updating from v8.1.18 or earlier may need to manually close the app once after it reaches Closing for update; future updates from v8.1.19 should close automatically."
 }
