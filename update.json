@@ -1,11 +1,11 @@
 {
-  "version": "8.1.14",
-  "channel": "stable",
-  "file": "FieldBookSync_Setup_8.1.14.exe",
-  "download_url": "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.14/FieldBookSync_Setup_8.1.14.exe",
-  "size_bytes": 6605312,
-  "sha256": "6c5f59f70633acb2774fd93f9ccd8c7f40854cbcdc49b32848fd9f9455ab1456",
-  "publisher": "Clever Bird Development",
-  "required": false,
-  "release_notes": "Adds the in-app Feedback Center, Report Bug / Request Feature workflow, Copy Support Info, privacy-safe diagnostic ZIP access, and remotely managed Google Form configuration. This release also validates the v8.1.13 to v8.1.14 self-update flow."
+    "version":  "8.1.18",
+    "channel":  "stable",
+    "file":  "FieldBookSync_Setup_8.1.18.exe",
+    "download_url":  "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.18/FieldBookSync_Setup_8.1.18.exe",
+    "size_bytes":  6488064,
+    "sha256":  "ad0f37e974546bbc29a7a9eb6317d8ca970121a628f1de4f81e7d696eb6be5b6",
+    "publisher":  "Clever Bird Development",
+    "required":  false,
+    "release_notes":  "Fixes the Windows startup/Continue freeze, adds the in-app feedback wizard and local feedback logs, adds CNA/CNL dip statuses, and improves startup diagnostics and responsiveness."
 }
