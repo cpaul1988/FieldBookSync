@@ -1,11 +1,11 @@
 {
-    "version":  "8.1.10",
+    "version":  "8.1.11",
     "channel":  "stable",
-    "file":  "FieldBookSync_Setup_8.1.10.exe",
-    "download_url":  "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.10/FieldBookSync_Setup_8.1.10.exe",
-    "size_bytes":  6282240,
-    "sha256":  "af3b49de22538889f19d713340d841149a88b8ef144d58e04a2dfb8206e0d53c",
+    "file":  "FieldBookSync_Setup_8.1.11.exe",
+    "download_url":  "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.11/FieldBookSync_Setup_8.1.11.exe",
+    "size_bytes":  6438912,
+    "sha256":  "d470ed337a750b4e899beb726280ad0a1e79147ee21a8ce1fcae7ecfb27d79f8",
     "publisher":  "Clever Bird Development",
     "required":  false,
-    "release_notes":  "GitHub Update Runtime: moves FieldBook Sync updates from Google Drive to GitHub Releases, automatically migrates legacy Drive settings, and validates HTTPS response type, Windows EXE header, expected size, and SHA-256 before launching Setup."
+    "release_notes":  "Adds a Help update notification dot, Available Point Ranges CSV for raw survey uploads, and a safe detached updater handoff that waits for FieldBook Sync to fully exit before Setup starts."
 }
