@@ -1,0 +1,194 @@
+name: Publish FieldBook Sync v8.1.18
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v8118.yml'
+      - 'release/v8.1.18/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download verified v8.1.14 stable installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --retry-delay 2 \
+            'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.14/FieldBookSync_Setup_8.1.14.exe' \
+            -o base-8.1.14.exe
+          echo '6c5f59f70633acb2774fd93f9ccd8c7f40854cbcdc49b32848fd9f9455ab1456  base-8.1.14.exe' | sha256sum -c -
+
+      - name: Reconstruct exact v8.1.18 payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release/v8.1.14/extract_payload.py base-8.1.14.exe payload
+          mkdir overlay
+          unzip -q release/v8.1.18/v8118_overlay.zip -d overlay
+          cp -a overlay/payload/. payload/
+          while IFS= read -r rel; do
+            [ -z "$rel" ] && continue
+            rm -f "payload/$rel"
+          done < overlay/remove.txt
+
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags '-H=windowsgui -s -w' \
+            -o payload/FieldBookSync.exe overlay/build_src/app_launcher.go
+
+      - name: Verify payload byte-for-byte against reviewed manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+
+          root = Path('payload')
+          manifest = Path('release/v8.1.18/payload.sha256')
+          expected = {}
+          for raw in manifest.read_text(encoding='utf-8').splitlines():
+              raw = raw.strip()
+              if not raw:
+                  continue
+              digest, rel = raw.split('  ', 1)
+              expected[rel] = digest.lower()
+
+          actual_paths = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file())
+          expected_paths = sorted(expected)
+          missing = sorted(set(expected_paths) - set(actual_paths))
+          extra = sorted(set(actual_paths) - set(expected_paths))
+          mismatches = []
+          for rel in sorted(set(expected_paths) & set(actual_paths)):
+              got = hashlib.sha256((root / rel).read_bytes()).hexdigest()
+              if got != expected[rel]:
+                  mismatches.append((rel, expected[rel], got))
+
+          if missing or extra or mismatches:
+              print('Missing:', missing)
+              print('Extra:', extra)
+              print('Mismatches:', mismatches)
+              raise SystemExit('v8.1.18 payload verification failed')
+          print(f'Payload verified: {len(actual_paths)} files')
+          PY
+
+      - name: Source and UI sanity checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            payload/fieldbook_sync/app.py \
+            payload/fieldbook_sync/models.py \
+            payload/fieldbook_sync/feedback.py \
+            payload/fieldbook_sync/global_mapper.py \
+            payload/fieldbook_sync/aggregate.py \
+            payload/desktop.py
+          node --check payload/fieldbook_sync/static/app.js
+          test "$(tr -d '\r\n' < payload/VERSION.txt)" = '8.1.18'
+          grep -q 'CNA' payload/fieldbook_sync/aggregate.py
+          grep -q 'CNL' payload/fieldbook_sync/aggregate.py
+          grep -q 'feedback' payload/fieldbook_sync/feedback.py
+          grep -q '8.1.18' payload/fieldbook_sync/static/index.html
+
+      - name: Build Setup EXE
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root = Path('payload')
+          dest = Path('build/payload.zip')
+          with zipfile.ZipFile(dest, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file():
+                      z.write(p, p.relative_to(root).as_posix())
+          print(dest, dest.stat().st_size)
+          PY
+          cp overlay/build_src/bootstrapper_main.go build/bootstrapper_main.go
+          cd build
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags '-H=windowsgui -s -w' \
+            -o FieldBookSync_Setup_8.1.18.exe bootstrapper_main.go
+          sha256sum FieldBookSync_Setup_8.1.18.exe > FieldBookSync_Setup_8.1.18.exe.sha256
+          test "$(head -c2 FieldBookSync_Setup_8.1.18.exe)" = 'MZ'
+          test "$(stat -c%s FieldBookSync_Setup_8.1.18.exe)" -gt 5000000
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<'EOF'
+          FieldBook Sync v8.1.18 is a stability and workflow release.
+
+          Highlights:
+          - Fixes the Windows native-window handoff that could leave FieldBook Sync showing Not Responding after clicking Continue.
+          - Reworks desktop bridge exposure and defers nonessential GPU/recovery work until the main interface is interactive.
+          - Adds an in-app Bug Report / Feature Request wizard with append-only local feedback logs and shared-tracker sync status.
+          - Adds first-class CNA (Could Not Access) and CNL (Could Not Locate) dip statuses throughout analysis, review, search, and exports.
+          - Keeps Global Mapper as an optional compatibility converter while native FieldBook Sync Map support remains preferred.
+          - Adds startup timing diagnostics to make any future startup stalls traceable.
+
+          The reviewed v8.1.18 candidate passed 233/233 automated tests before publication. The release pipeline additionally verifies the reconstructed application payload byte-for-byte against the reviewed payload manifest before building the installer.
+          EOF
+          cd build
+          if gh release view v8.1.18 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v8.1.18 \
+              FieldBookSync_Setup_8.1.18.exe \
+              FieldBookSync_Setup_8.1.18.exe.sha256 \
+              --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit v8.1.18 --repo "$GITHUB_REPOSITORY" \
+              --title 'FieldBook Sync v8.1.18' --notes-file ../release-notes.md
+          else
+            gh release create v8.1.18 \
+              FieldBookSync_Setup_8.1.18.exe \
+              FieldBookSync_Setup_8.1.18.exe.sha256 \
+              --repo "$GITHUB_REPOSITORY" \
+              --title 'FieldBook Sync v8.1.18' \
+              --notes-file ../release-notes.md
+          fi
+
+      - name: Publish stable update manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SIZE=$(stat -c%s build/FieldBookSync_Setup_8.1.18.exe)
+          SHA=$(sha256sum build/FieldBookSync_Setup_8.1.18.exe | awk '{print $1}')
+          python - <<PY
+          import json
+          from pathlib import Path
+          obj = {
+            'version': '8.1.18',
+            'channel': 'stable',
+            'file': 'FieldBookSync_Setup_8.1.18.exe',
+            'download_url': 'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.18/FieldBookSync_Setup_8.1.18.exe',
+            'size_bytes': int('$SIZE'),
+            'sha256': '$SHA',
+            'publisher': 'Clever Bird Development',
+            'required': False,
+            'release_notes': 'Fixes the Windows startup/Continue freeze, adds the in-app feedback wizard and local feedback logs, adds CNA/CNL dip statuses, and improves startup diagnostics and responsiveness.'
+          }
+          Path('new-update.json').write_text(json.dumps(obj, indent=2) + '\n', encoding='utf-8')
+          PY
+          CURRENT_SHA=$(gh api repos/$GITHUB_REPOSITORY/contents/update.json --jq .sha)
+          CONTENT=$(base64 -w0 new-update.json)
+          gh api repos/$GITHUB_REPOSITORY/contents/update.json -X PUT \
+            -f message='Publish FieldBook Sync v8.1.18 stable update manifest' \
+            -f content="$CONTENT" -f sha="$CURRENT_SHA" -f branch='main' >/dev/null
