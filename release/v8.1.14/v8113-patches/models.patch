@@ -1,0 +1,28 @@
+--- a/fieldbook_sync/models.py
++++ b/fieldbook_sync/models.py
+@@ -223,6 +223,8 @@
+     running: bool = False
+     started_at: Optional[str] = None
+     cancelled: bool = False
++    paused: bool = False
++    pause_requested: bool = False
+     complete: bool = False
+     provider: str = "hybrid"
+     total_pages: int = 0
+@@ -255,7 +257,7 @@
+     error_code: Optional[str] = None
+     resumable: bool = False
+     worker_heartbeat_at: Optional[str] = None
+-    # v8.1.12 local-model telemetry. These values are informational and are
++    # v8.1.13 local-model telemetry. These values are informational and are
+     # updated while Ollama warms or streams a response.
+     qwen_model: str = ""
+     qwen_state: str = "idle"
+@@ -346,6 +348,7 @@
+     fieldbook_files: List[ImportedFileRecord] = Field(default_factory=list)
+     survey_points: List[SurveyPoint] = Field(default_factory=list)
+     survey_issues: List[SurveyImportIssue] = Field(default_factory=list)
++    rod_height_busts: List[Dict[str, Any]] = Field(default_factory=list)
+     fieldbook_pages: List[FieldBookPage] = Field(default_factory=list)
+     ocr_candidates: List[OcrCandidate] = Field(default_factory=list)
+     results: List[ResultRecord] = Field(default_factory=list)
