@@ -1,5 +1,8 @@
 {
   "form_url": "",
+  "submit_url": "",
+  "intake_url": "",
+  "transport": "google_apps_script",
   "tracker_url": "https://docs.google.com/spreadsheets/d/1OvFje-9m8yFWTz6h73ZXmVcRdXKU6zRE6HQ2qPtlAa4/edit",
-  "message": "Submit bugs, feature requests, improvements, or questions through the FieldBook Sync feedback form."
+  "message": "Submit bugs, feature requests, improvements, or questions directly from the FieldBook Sync in-app wizard. Reports are saved locally first, then synced to the shared Intake tracker when the direct endpoint is configured."
 }
