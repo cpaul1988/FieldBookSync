@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths:
-      - '.github/workflows/publish-v8119.yml'
       - 'release/v8.1.19/**'
   workflow_dispatch:
 
@@ -166,9 +165,7 @@ jobs:
             -f content="$CONTENT" -f sha="$CURRENT_SHA" -f branch='main' --jq '.commit.sha')
           echo "Manifest commit: $COMMIT_SHA"
 
-          # Verify the exact commit returned by GitHub first, avoiding eventual-consistency
-          # false failures when main has not propagated to every read edge yet.
-          gh api "repos/$GITHUB_REPOSITORY/contents/update.json?ref=$COMMIT_SHA" --jq -r .content | tr -d '\n' | base64 -d > verify-update.json
+          gh api "repos/$GITHUB_REPOSITORY/contents/update.json?ref=$COMMIT_SHA" --jq .content | tr -d '\n' | base64 -d > verify-update.json
           python - <<'PY'
           import json
           obj=json.load(open('verify-update.json',encoding='utf-8'))
@@ -178,9 +175,8 @@ jobs:
           print('Exact manifest commit verified.')
           PY
 
-          # Poll main briefly until the same manifest is visible there.
           for n in 1 2 3 4 5 6; do
-            V=$(gh api "repos/$GITHUB_REPOSITORY/contents/update.json?ref=main" --jq -r .content | tr -d '\n' | base64 -d | jq -r .version || true)
+            V=$(gh api "repos/$GITHUB_REPOSITORY/contents/update.json?ref=main" --jq .content | tr -d '\n' | base64 -d | jq -r .version || true)
             if [ "$V" = '8.1.19' ]; then
               echo 'Stable main manifest verified at v8.1.19.'
               exit 0
