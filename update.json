@@ -1,0 +1,10 @@
+{
+  "version": "8.1.9",
+  "channel": "stable",
+  "file": "FieldBookSync_Setup_8.1.9.exe",
+  "download_url": "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.9/FieldBookSync_Setup_8.1.9.exe",
+  "sha256": "01167d0fa47312ce4b7308211a55d0dfd1290c4af052ecfd53ab0f292baedf83",
+  "publisher": "Clever Bird Development",
+  "required": false,
+  "release_notes": "Hotfix: restores Code Profile loading/import refresh in v8.1.8. Fixes 'loadProfiles is not defined' when importing CSV/Excel code profiles and restores profile refresh after import, save, delete, and project open."
+}
