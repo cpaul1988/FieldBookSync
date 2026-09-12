@@ -1,10 +1,10 @@
 {
-    "version":  "8.1.19",
+    "version":  "8.1.20",
     "channel":  "stable",
-    "file":  "FieldBookSync_Setup_8.1.19.exe",
-    "download_url":  "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.19/FieldBookSync_Setup_8.1.19.exe",
-    "size_bytes":  6488064,
-    "sha256":  "bed4c717b7569c2c30c273756f12146e77f401fe8dbffef6b012618bb7e4ffc9",
+    "file":  "FieldBookSync_Setup_8.1.20.exe",
+    "download_url":  "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.20/FieldBookSync_Setup_8.1.20.exe",
+    "size_bytes":  6492160,
+    "sha256":  "a01825e3a48abc16377813e4d245ed678e9a7cd1343b1261901e53289d746759",
     "publisher":  "Clever Bird Development",
     "required":  false,
     "release_notes":  "Fixes the Windows startup/Continue freeze, adds the in-app feedback wizard and local feedback logs, adds CNA/CNL dip statuses, and improves startup diagnostics and responsiveness."
