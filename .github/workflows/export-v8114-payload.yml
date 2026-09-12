@@ -1,0 +1,39 @@
+name: Export v8.1.14 Payload
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/export-v8114-payload.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download stable v8.1.14 installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --retry-delay 2 \
+            'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.14/FieldBookSync_Setup_8.1.14.exe' \
+            -o FieldBookSync_Setup_8.1.14.exe
+          echo '6c5f59f70633acb2774fd93f9ccd8c7f40854cbcdc49b32848fd9f9455ab1456  FieldBookSync_Setup_8.1.14.exe' | sha256sum -c -
+      - name: Extract embedded payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release/v8.1.14/extract_payload.py FieldBookSync_Setup_8.1.14.exe payload
+          test -f payload/VERSION.txt
+          test "$(tr -d '\r\n' < payload/VERSION.txt)" = '8.1.14'
+          zip -qr v8114-payload.zip payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v8114-payload
+          path: v8114-payload.zip
+          if-no-files-found: error
+          retention-days: 1
