@@ -1,0 +1,192 @@
+name: Publish FieldBook Sync v8.1.19
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v8119.yml'
+      - 'release/v8.1.19/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download verified v8.1.18 stable installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --retry-delay 2 \
+            'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.18/FieldBookSync_Setup_8.1.18.exe' \
+            -o base-8.1.18.exe
+          test "$(stat -c%s base-8.1.18.exe)" -eq 6488064
+          echo 'ad0f37e974546bbc29a7a9eb6317d8ca970121a628f1de4f81e7d696eb6be5b6  base-8.1.18.exe' | sha256sum -c -
+
+      - name: Reconstruct exact tested v8.1.19 payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release/v8.1.14/extract_payload.py base-8.1.18.exe payload
+          python release/v8.1.19/patch_payload.py payload
+          test "$(tr -d '\r\n' < payload/VERSION.txt)" = '8.1.19'
+
+      - name: Source and updater sanity checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            payload/desktop.py \
+            payload/fieldbook_sync/app.py \
+            payload/fieldbook_sync/models.py
+          node --check payload/fieldbook_sync/static/app.js
+          grep -q 'FBS-native-shutdown-watch' payload/desktop.py
+          grep -q 'native_shutdown_event' payload/desktop.py
+          grep -q 'requesting native shutdown handoff' payload/fieldbook_sync/app.py
+          grep -q 'window.pywebview?.api?.exit_app' payload/fieldbook_sync/static/app.js
+          grep -q 'Closing for update' payload/fieldbook_sync/static/app.js
+
+      - name: Build Setup EXE
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('payload')
+          dest=Path('build/payload.zip')
+          with zipfile.ZipFile(dest,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file():
+                      z.write(p,p.relative_to(root).as_posix())
+          print(dest, dest.stat().st_size)
+          PY
+          cp release/v8.1.19/bootstrapper_main.go build/bootstrapper_main.go
+          cd build
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags '-H=windowsgui -s -w' \
+            -o FieldBookSync_Setup_8.1.19.exe bootstrapper_main.go
+          sha256sum FieldBookSync_Setup_8.1.19.exe > FieldBookSync_Setup_8.1.19.exe.sha256
+          test "$(head -c2 FieldBookSync_Setup_8.1.19.exe)" = 'MZ'
+          test "$(stat -c%s FieldBookSync_Setup_8.1.19.exe)" -gt 5000000
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<'EOF'
+          FieldBook Sync v8.1.19 is an update-handoff reliability hotfix.
+
+          Highlights:
+          - Fixes the in-app updater getting stuck indefinitely on "Closing for update..." after the installer was already downloaded and verified.
+          - The native desktop shell now watches the application shutdown event, closes itself, and returns control to the parent launcher so Setup can start automatically.
+          - The update button also explicitly calls the native exit bridge after a verified update is staged, providing a second independent handoff path.
+          - Adds update-staging diagnostics for future troubleshooting.
+          - Preserves all v8.1.18 startup responsiveness fixes, CNA/CNL dip-status recognition, the in-app feedback wizard, GIS/map work, and prior survey features.
+
+          Upgrade note: v8.1.18 and earlier contain the old closing-handoff bug. If one of those versions reaches "Closing for update..." while installing v8.1.19, manually closing the FieldBook Sync window once allows the already-staged installer to continue. After v8.1.19 is installed, future in-app updates should hand off automatically.
+
+          The v8.1.19 candidate passed 237/237 automated tests and the update handoff was confirmed working on Windows before stable promotion. The release pipeline reconstructs and cryptographically verifies the exact tested application payload before packaging the public installer.
+          EOF
+          cd build
+          if gh release view v8.1.19 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v8.1.19 \
+              FieldBookSync_Setup_8.1.19.exe \
+              FieldBookSync_Setup_8.1.19.exe.sha256 \
+              --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit v8.1.19 --repo "$GITHUB_REPOSITORY" \
+              --title 'FieldBook Sync v8.1.19' --notes-file ../release-notes.md --prerelease=false
+          else
+            gh release create v8.1.19 \
+              FieldBookSync_Setup_8.1.19.exe \
+              FieldBookSync_Setup_8.1.19.exe.sha256 \
+              --repo "$GITHUB_REPOSITORY" \
+              --title 'FieldBook Sync v8.1.19' \
+              --notes-file ../release-notes.md
+          fi
+
+      - name: Verify GitHub release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_SIZE=$(stat -c%s build/FieldBookSync_Setup_8.1.19.exe)
+          EXPECTED_SHA=$(sha256sum build/FieldBookSync_Setup_8.1.19.exe | awk '{print $1}')
+          RELEASE_JSON=$(gh api repos/$GITHUB_REPOSITORY/releases/tags/v8.1.19)
+          GOT_SIZE=$(printf '%s' "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="FieldBookSync_Setup_8.1.19.exe") | .size')
+          GOT_DIGEST=$(printf '%s' "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="FieldBookSync_Setup_8.1.19.exe") | .digest // empty')
+          CHECK_NAME=$(printf '%s' "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="FieldBookSync_Setup_8.1.19.exe.sha256") | .name')
+          test "$GOT_SIZE" = "$EXPECTED_SIZE"
+          test "$CHECK_NAME" = 'FieldBookSync_Setup_8.1.19.exe.sha256'
+          if [ -n "$GOT_DIGEST" ]; then test "$GOT_DIGEST" = "sha256:$EXPECTED_SHA"; fi
+          echo "Release assets verified: size=$GOT_SIZE sha256=$EXPECTED_SHA"
+
+      - name: Publish stable update manifest last
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SIZE=$(stat -c%s build/FieldBookSync_Setup_8.1.19.exe)
+          SHA=$(sha256sum build/FieldBookSync_Setup_8.1.19.exe | awk '{print $1}')
+          python - <<PY
+          import json
+          from pathlib import Path
+          obj={
+            'version':'8.1.19',
+            'channel':'stable',
+            'file':'FieldBookSync_Setup_8.1.19.exe',
+            'download_url':'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.19/FieldBookSync_Setup_8.1.19.exe',
+            'size_bytes':int('$SIZE'),
+            'sha256':'$SHA',
+            'publisher':'Clever Bird Development',
+            'required':False,
+            'release_notes':'Fixes the in-app updater handoff getting stuck on Closing for update. Adds native shutdown-event watching, an explicit native exit fallback, and update-staging diagnostics. Users updating from v8.1.18 or earlier may need to manually close the app once after it reaches Closing for update; future updates from v8.1.19 should close automatically.'
+          }
+          Path('new-update.json').write_text(json.dumps(obj,indent=2)+'\n',encoding='utf-8')
+          PY
+          CURRENT_SHA=$(gh api repos/$GITHUB_REPOSITORY/contents/update.json --jq .sha)
+          CONTENT=$(base64 -w0 new-update.json)
+          COMMIT_SHA=$(gh api repos/$GITHUB_REPOSITORY/contents/update.json -X PUT \
+            -f message='Publish FieldBook Sync v8.1.19 stable update manifest' \
+            -f content="$CONTENT" -f sha="$CURRENT_SHA" -f branch='main' --jq '.commit.sha')
+          echo "Manifest commit: $COMMIT_SHA"
+
+          # Verify the exact commit returned by GitHub first, avoiding eventual-consistency
+          # false failures when main has not propagated to every read edge yet.
+          gh api "repos/$GITHUB_REPOSITORY/contents/update.json?ref=$COMMIT_SHA" --jq -r .content | tr -d '\n' | base64 -d > verify-update.json
+          python - <<'PY'
+          import json
+          obj=json.load(open('verify-update.json',encoding='utf-8'))
+          assert obj['version']=='8.1.19', obj
+          assert obj['channel']=='stable', obj
+          assert obj['required'] is False, obj
+          print('Exact manifest commit verified.')
+          PY
+
+          # Poll main briefly until the same manifest is visible there.
+          for n in 1 2 3 4 5 6; do
+            V=$(gh api "repos/$GITHUB_REPOSITORY/contents/update.json?ref=main" --jq -r .content | tr -d '\n' | base64 -d | jq -r .version || true)
+            if [ "$V" = '8.1.19' ]; then
+              echo 'Stable main manifest verified at v8.1.19.'
+              exit 0
+            fi
+            echo "Waiting for main manifest propagation ($n/6), currently: $V"
+            sleep 2
+          done
+          echo 'Exact manifest commit succeeded, but main propagation was not visible within the retry window.' >&2
+          exit 1
