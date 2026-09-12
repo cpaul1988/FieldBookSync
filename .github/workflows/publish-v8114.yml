@@ -1,0 +1,105 @@
+name: Publish FieldBook Sync v8.1.14
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-v8114.yml'
+      - 'release/v8.1.14/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download v8.1.13 base installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 4 --retry-delay 2 \
+            'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.13/FieldBookSync_Setup_8.1.13.exe' \
+            -o base-8.1.13.exe
+          echo 'e0dbdd0fb0b57eca8bb4bc82e00f609fbd6669b487820fff8e97b2d50260e314  base-8.1.13.exe' | sha256sum -c -
+
+      - name: Reconstruct v8.1.14 payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python release/v8.1.14/extract_payload.py base-8.1.13.exe payload
+          python release/v8.1.14/patch_payload.py payload
+          python -m py_compile payload/fieldbook_sync/app.py
+          node --check payload/fieldbook_sync/static/app.js
+          test "$(cat payload/VERSION.txt | tr -d '\r\n')" = '8.1.14'
+
+      - name: Build embedded payload and Setup EXE
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('payload')
+          dest=Path('build/payload.zip')
+          with zipfile.ZipFile(dest,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file(): z.write(p,p.relative_to(root).as_posix())
+          print(dest, dest.stat().st_size)
+          PY
+          cp release/v8.1.14/bootstrapper_main.go build/bootstrapper_main.go
+          cd build
+          GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-H=windowsgui -s -w' \
+            -o FieldBookSync_Setup_8.1.14.exe bootstrapper_main.go
+          sha256sum FieldBookSync_Setup_8.1.14.exe > FieldBookSync_Setup_8.1.14.exe.sha256
+          test "$(head -c2 FieldBookSync_Setup_8.1.14.exe)" = 'MZ'
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd build
+          NOTES='Adds the in-app Feedback Center, Report Bug / Request Feature workflow, Copy Support Info, privacy-safe diagnostic ZIP access, and remotely managed Google Form configuration. This release is also the end-to-end self-update test from v8.1.13.'
+          if gh release view v8.1.14 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload v8.1.14 FieldBookSync_Setup_8.1.14.exe FieldBookSync_Setup_8.1.14.exe.sha256 --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit v8.1.14 --repo "$GITHUB_REPOSITORY" --title 'FieldBook Sync v8.1.14' --notes "$NOTES"
+          else
+            gh release create v8.1.14 FieldBookSync_Setup_8.1.14.exe FieldBookSync_Setup_8.1.14.exe.sha256 \
+              --repo "$GITHUB_REPOSITORY" --title 'FieldBook Sync v8.1.14' --notes "$NOTES"
+          fi
+
+      - name: Publish stable update manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SIZE=$(stat -c%s build/FieldBookSync_Setup_8.1.14.exe)
+          SHA=$(sha256sum build/FieldBookSync_Setup_8.1.14.exe | awk '{print $1}')
+          python - <<PY
+          import json
+          from pathlib import Path
+          obj={
+            'version':'8.1.14','channel':'stable','file':'FieldBookSync_Setup_8.1.14.exe',
+            'download_url':'https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.14/FieldBookSync_Setup_8.1.14.exe',
+            'size_bytes':int('$SIZE'),'sha256':'$SHA','publisher':'Clever Bird Development','required':False,
+            'release_notes':'Adds the in-app Feedback Center, Report Bug / Request Feature workflow, Copy Support Info, privacy-safe diagnostic ZIP access, and remotely managed Google Form configuration. This release also validates the v8.1.13 to v8.1.14 self-update flow.'}
+          Path('new-update.json').write_text(json.dumps(obj,indent=2)+'\n')
+          PY
+          CURRENT_SHA=$(gh api repos/$GITHUB_REPOSITORY/contents/update.json --jq .sha)
+          CONTENT=$(base64 -w0 new-update.json)
+          gh api repos/$GITHUB_REPOSITORY/contents/update.json -X PUT \
+            -f message='Publish FieldBook Sync v8.1.14 update manifest' \
+            -f content="$CONTENT" -f sha="$CURRENT_SHA" -f branch='main' >/dev/null
