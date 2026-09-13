@@ -1,11 +1,11 @@
 {
-    "version":  "8.1.22",
-    "channel":  "stable",
-    "file":  "FieldBookSync_Setup_8.1.22.exe",
-    "download_url":  "https://github.com/cpaul1988/FieldBookSync/releases/download/v8.1.22/FieldBookSync_Setup_8.1.22.exe",
-    "size_bytes":  7482368,
-    "sha256":  "cee8c4e00f51c7b3dd257ad853a2cc1c1fa5d57ec551e223e314738ea5f503c9",
-    "publisher":  "Clever Bird Development",
-    "required":  false,
-    "release_notes":  "Fixes the Windows startup/Continue freeze, adds the in-app feedback wizard and local feedback logs, adds CNA/CNL dip statuses, and improves startup diagnostics and responsiveness."
+  "version": "9.0.0",
+  "channel": "stable",
+  "file": "SurveySync_Setup_9.0.0.exe",
+  "download_url": "https://github.com/cpaul1988/SurveySync/releases/download/v9.0.0-beta/SurveySync_Setup_9.0.0.exe",
+  "size_bytes": 5850560,
+  "sha256": "d07aa691e0b7389dee2c5870777467b50bffa6e5b5fe9b2fa7114cbc497720d9",
+  "publisher": "Clever Bird Development",
+  "required": false,
+  "release_notes": "FieldBook Sync is becoming SurveySync. Your existing FieldBook workflow and projects are preserved inside the FieldBookSync module. SurveySync 9.0.0 adds the new modular surveying platform, shared project architecture, ControlSync, COGOSync, ReportSync, QASync foundation, shared CRS and units, audit history, and future survey modules."
 }
