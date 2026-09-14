@@ -1,0 +1,237 @@
+{
+  "baseline": "FieldBook Sync v8.1.14",
+  "files": {
+    "Force_Close_FieldBook_Sync.bat": {
+      "before": "65b70644820e12000b67b421289b1e44162d02877f828d511df0780480081c39",
+      "after": "9a5c3e6845bb50c5319395c602513b18571e813f9f96580fc9f14bd736347697"
+    },
+    "Install_PaddleOCR_GPU_Optional.bat": {
+      "before": "b3ef3a22236b4caa557b4ec64579de6ee4488ecac28910858ed1fb0c4d1ee374",
+      "after": "16e0da6bc4efc8b8bfeaccac2ee6c6eaec176fa2ea98c6ea4840ffa989ece9ac"
+    },
+    "QA_REPORT.md": {
+      "before": "c625a70bd2e04295ca7b2b110ca117dde44f0aae770e70d133b24c15ba598997",
+      "after": "38a24ebc49acb889f8667835d5fa3e7e6021cb533eee27ca5895e1592d6a5aa7"
+    },
+    "README.md": {
+      "before": "47606a8b21d8aa86fec634b033c9541b2be5defa556af1d5ca533f25d00f501a",
+      "after": "821a34fdf9c9bfa0fff22a07a5dbdc129b16cc7a5feff662339a5a21225a3b52"
+    },
+    "Repair_PaddleOCR_Environment.bat": {
+      "before": "fe4fd7e429f1c853992a28287c20e92c7928b7434b98b2c9a49d8fe85d437c44",
+      "after": "987611c502781c4fcb4bafdee5c7019c3a8947b675a22f50541385cc081c5691"
+    },
+    "Reset_FieldBook_Sync_Test_Data.bat": {
+      "before": "0a8c8c7bb16e6195dda8092e7a4e1faf78d0096e782b94d38ba56fd56f6d455d",
+      "after": "aa08fadc32feeece42cb9990b2c42f1773c0de1a46dfcd67f2eb0fcd88452c06"
+    },
+    "SURVEYSENSE_DEVELOPMENT.md": {
+      "before": null,
+      "after": "0c3efdc7d8200b182c2a849d0bd6f9e5cd9d01203b4ef17d3b4664187f460b98"
+    },
+    "VERSION.txt": {
+      "before": "eea91de80d6006853ff093a4ae298fc7617bd8b38160972b1f24252e5e9aef61",
+      "after": "81cb79575523921d27d63c3d1ef2c3450f72b6cf2035d9875402ba830e86a278"
+    },
+    "arcgis_bridge.py": {
+      "before": "b4392de5d1af0fb2b0442cf39b3aff763e1fa68846efda37c2584beddf20a34c",
+      "after": "b6d522c76fa3f3f4eb171b4c0093a4215dd15c4219ce90c4df468f698a5068b2"
+    },
+    "arcgis_desktop_bridge.py": {
+      "before": "c0ba8f59c36fe2439cb7558db8f7fc7d75d422f8b1f12210babeb72dd4b3e8a4",
+      "after": "e021fe6f592ad505deea119f600f3e738965207aef7dec59991b5453dddf0255"
+    },
+    "bootstrap_windows.py": {
+      "before": "9308c43664a58a8ee7ee188ffe9119399530a335f14d6c8578738d558fea0e2a",
+      "after": "585a898663677274dc7c6eced03e5832cd24a1f0dae761a24923bf3db0a47d6f"
+    },
+    "build_windows_exe.bat": {
+      "before": "f529f4a9092eb7ad213e90928829b178828e622ebba2d523d09ad9f10fe1df34",
+      "after": "ea7c98c4a5889e4f27d376e67a6e7b8cbbadc372717877bbd19767ed342e0100"
+    },
+    "desktop.py": {
+      "before": "427041492bdda910b560ece153bc75e4ea890443f385635d4f4d066b2654a962",
+      "after": "f9dc5051bb1e358c8dc38c5b2fb0614836fa1b556ce988bcb41263e38b0f6958"
+    },
+    "docs/FieldBookSync_v8_1_14_README.md": {
+      "before": null,
+      "after": "47606a8b21d8aa86fec634b033c9541b2be5defa556af1d5ca533f25d00f501a"
+    },
+    "fieldbook_sync/__init__.py": {
+      "before": "e43b3f0798917b8ecc925002f75e2c7f2b02b3e0f7b52e71280dec34316919be",
+      "after": "63e6253b4d1069c11a017644aa531745e81861190406cc6b538af0b5191f9a93"
+    },
+    "fieldbook_sync/ai_reader.py": {
+      "before": "67cf17ce25811538ecda4c1f9820ea5650c4e6d532f9d4da2124394b337e3e98",
+      "after": "8ba4014d32132e0c05b4fa3d5553f2bbc77c69490926748b6114e3b1c61b8282"
+    },
+    "fieldbook_sync/app.py": {
+      "before": "d0658fa2c657f699c268e10485858540524ad387881f46236003ca91fb64aa1b",
+      "after": "eca4f2985fee1b039b4a498e6010a8d61989009a078374967c76f355dc70af8e"
+    },
+    "fieldbook_sync/errors.py": {
+      "before": "f9290843c02badedc034e9321f4e259bd1f423e8de479014fb34ae76c487b60c",
+      "after": "38d596952b4dcb0b0cbecda7e62b50e746220b1dc2532232e89c7e35c9b6a199"
+    },
+    "fieldbook_sync/exporter.py": {
+      "before": "7c08edc1988d470a357a9e672c8d5ac4dd31b623234ca830562f10b36bf3d3c6",
+      "after": "245ae33e8252c9eb28e912d800366c1cf7bbdffa280865c3567f46b8ef222016"
+    },
+    "fieldbook_sync/ground_design.py": {
+      "before": null,
+      "after": "ada16ac0f8ee20ce854bb33bd9c6467056c0a79b6d29b7f18270ae6c4c40838a"
+    },
+    "fieldbook_sync/image_processing.py": {
+      "before": "afa4922628e0762469ad0fb98f51ddd0dd9bbcb155c95a7bb418590ca4b07b3a",
+      "after": "d8ced0fb34fa04e97b5b307d288c4ceb011ce421d0a803369c04c84bcee380e3"
+    },
+    "fieldbook_sync/job_engine.py": {
+      "before": "a4ee95766ab740967bc3da79a8ff33d5e13f5ee1bd215cd6c193c70f21263099",
+      "after": "887dbf0647ca9e8ae92153327241a07a2b04ad6eecfd5270d854c0f292add5b8"
+    },
+    "fieldbook_sync/map_gis.py": {
+      "before": "f67c59d30c52f8387fd5d6bb68e9a5cb459b68875228b73b55a52159ddbdcb88",
+      "after": "16d2724f50ed4f7f804b65a4d894ff94623e3fc43c8c50c7f1625978321ff1a1"
+    },
+    "fieldbook_sync/models.py": {
+      "before": "25cbea7f17b80544401bcf2388247e8cbfaa58bec03b2910b1b60730d1b96d65",
+      "after": "122a79011f751755e41d13256365d718c10f0de2477e1a2b6a77c6c279f01b6b"
+    },
+    "fieldbook_sync/ocr_local.py": {
+      "before": "b49f3f1dbb964dfcee3acf427b8d074054fe2b30973e365531b2912b2b083894",
+      "after": "02290d885bf86fdc98dce02b06854a94f4ab5588beb184bb08c62bae653f9ceb"
+    },
+    "fieldbook_sync/profiles.py": {
+      "before": "ce1c26e54b8fc6ba1263f432825d51ecb1d20d44b0e121067f4d51efd1ff673e",
+      "after": "76c0205b5700dbeb5fd30400e63bbacb60efc92372707ccf2a442858faab31f9"
+    },
+    "fieldbook_sync/project_files.py": {
+      "before": "0d66f1b888a5cf4e736c234fd573036b8d95c4dc51655327cde9b6df6c6ac1ec",
+      "after": "a0a66d57fce050eacb86c65deb85df5465b7643c73e28630f9d417d8600f921d"
+    },
+    "fieldbook_sync/sewer_pickup.py": {
+      "before": null,
+      "after": "f97d9ac3b66ce2dc3d8ff4d6a099de9cade2123f36ebb0914608da3469e835fb"
+    },
+    "fieldbook_sync/spatial_fields.py": {
+      "before": null,
+      "after": "276b154c68e2983fc1b9b1be5f0e8de98d03140d7ecfe56fa8247847fe0399af"
+    },
+    "fieldbook_sync/static/app.js": {
+      "before": "9cdf2ff77e1036e45026bf8c023868c7367c3efe5c16b2bf5aed247bfff789a3",
+      "after": "f2bd78ed3e78400be538c35b3d7b4e3227d954e16d757e8c7776f713eb8e9ebb"
+    },
+    "fieldbook_sync/static/delivery.js": {
+      "before": null,
+      "after": "d29660d55b35a20276b78445721f909c68d387d292595ee3e1cadc453aad6cf5"
+    },
+    "fieldbook_sync/static/ground_design.js": {
+      "before": null,
+      "after": "0cf54a652850d58c7628c0de027135d868957b68e780c59f9ab39377f602e6a3"
+    },
+    "fieldbook_sync/static/index.html": {
+      "before": "15dc6f3f555ba843b2feefed67d02fe59cd7a9feec21f5c4ca56bca54091f669",
+      "after": "aad3c3217c169c931712a9cb0904e114680aa805b12543e52d49ba25fe61cdcb"
+    },
+    "fieldbook_sync/survey.py": {
+      "before": "611f43d61e1d36bda2536cdaf9140ee0fa799efc0951e7dfd29461b7830b0a40",
+      "after": "ef9d17fb957cb916c3d89580118a240a838b4f1f471781b5a347b9c4fd660389"
+    },
+    "fieldbook_sync/survey_delivery.py": {
+      "before": null,
+      "after": "906e01ce282b3bc4dad53374c49b789bcd51c7440db725835c15bef2f53134e4"
+    },
+    "file_association.py": {
+      "before": "8e5e18ad298462fbb6a240bf469df5db00a690ac08fceb75830f95f8f8dc0623",
+      "after": "1e186ed386cfc64b9c6d84508aa355ac32303f4d2f68afd50201d80b8f1dc0ef"
+    },
+    "gpu_compat.py": {
+      "before": "e030421a6300671ba67763252dbc9c6a06b4c69e6be87a9d926cf9c8a6a7f3ac",
+      "after": "040909d998405b60982e799b2da0a52781796a4fb400963242661020a10e4ed5"
+    },
+    "install_local_ai.bat": {
+      "before": "a85b4d49c1dc5faeadc8be9f49a8ddd55dcbb92f7088f9ad2cebbaafee0d8583",
+      "after": "a11f2ac6b79c11ceebb4115469e040e48b67af967eeeb8c767924fab5c34193e"
+    },
+    "install_paddleocr_auto.bat": {
+      "before": "98a6f6946334d0dee8dbe49a0105d22ffb30d0d6e98aa9dcfab6ff74deed52c3",
+      "after": "6e3f9d738477c235fad3af6eaa37278213b113bea7b9a2328568dcc00baf0534"
+    },
+    "install_paddleocr_local.bat": {
+      "before": "377e7022ab4b6fcb124d9aa03043861dd991a55f0c54d83039e9a2a9c20f122b",
+      "after": "666fe29073647abc0c6558927932cd3885ad01cc1ea58274c6340600b8f5da60"
+    },
+    "install_qwen_local.bat": {
+      "before": "4ca24be9248a009faf5d4681c948bde7b93f821620b35fc8f2553e4dc007e395",
+      "after": "dc3d8564c156c5e403f088be78fdbe95b2ddfa49b0149e1ee1d96b95238a89d7"
+    },
+    "installer/app_launcher.go": {
+      "before": "9a7ab88d4d6a10d7b7b5b58f603ff187045e119b77ef207427ba602aee44c9b3",
+      "after": "dc62f22f8f4009e05b5aac6ee0f97001b2b5189c778cf46660ce9de2ecaa14a2"
+    },
+    "installer/provision_runtime.ps1": {
+      "before": "f7d1dd626945b90fdf48aa0de0adc8c3f0378977e0ee66811e849be15d92f625",
+      "after": "e6e9c3c2ddf685a06d4db6005189b4508fbc923bab31397c477b6ceb9fd8ddaf"
+    },
+    "installer/setup_ui.ps1": {
+      "before": "03f24afcc2f81a7107d4b00b1a9d30bda81bccc9c9183d471c4f721618f6b1a7",
+      "after": "a5881038f66d1b83cb87c2ca257cbe7c6232f4248ffe7bbb670b0ee6cb39bce5"
+    },
+    "paddle_bridge.py": {
+      "before": "b2081d7f4ccd5ad1f8ef7bc0b0dbb4cddf9c17ae8be1d24d780563054bd850d3",
+      "after": "247c45f64d268fbd733d17671a2404ed08613699ffcad41fa0a37581309b55e8"
+    },
+    "register_fbs_file_association.bat": {
+      "before": "eff15df2a0c50239e947c5fec3684f1e8aa27dbae92d61cae0996ac682e654a0",
+      "after": "019fbf999a180a4beca2f28555534b203d0113bae756ff33106ce33c4f239f05"
+    },
+    "requirements.txt": {
+      "before": "e9dfa85f9bf039a71e6f82f2886fd6efb3d3ff07bc87916d70cb6c1fde28c4df",
+      "after": "0edae46dcbc9ce4b638592a6f011086c568af7434d4d990cc11771d7d625b2de"
+    },
+    "run_browser.bat": {
+      "before": "c34f7270253abd6f39bef2fcd56785d8fa7525e8e35abdb44165dc111026c5df",
+      "after": "8fcdd1621cd6208c0d48c09940aae95c1ddff9fad8e633e4cc05583c508f78fe"
+    },
+    "run_windows.bat": {
+      "before": "4731e19aecad4cfcd8c5d0346dbac982ecdc9ef20fd07bb6e6be33cd7dcdab12",
+      "after": "b08cbe09c0140051dff591784768c9c75ea433367c34fa0e7ec5987275cac441"
+    },
+    "tests/prepare_ui_fixture.py": {
+      "before": null,
+      "after": "bab68fedc5ca383ad9da2c870893f90db6a87cfdce8ee7974f7533fe836b893d"
+    },
+    "tests/run_ui_tests.py": {
+      "before": null,
+      "after": "5e8f240b7df228018cab4cea6343825b2a821c5c2d0b1b83cb1f2eaeac5e06ca"
+    },
+    "tests/test_ground_design.py": {
+      "before": null,
+      "after": "61ddd4b9fab4aa8c9e94148590df185c89f81bc9db445b6a333bc6cf9f310c42"
+    },
+    "tests/test_sewer_pickup.py": {
+      "before": null,
+      "after": "fd8ba985854fdcd269ead1b8c482c1624f99f7049b4177e4a1ff488a704eecb6"
+    },
+    "tests/test_spatial_fields.py": {
+      "before": null,
+      "after": "993b7273c00f122631272085735991377949da9ce41495ece2efa6cd821cde66"
+    },
+    "tests/test_surveysense_api.py": {
+      "before": null,
+      "after": "e953219a327591bb497725e01fac199d64a7a840f6248743f15a50f9480fdccf"
+    },
+    "tests/test_surveysense_delivery.py": {
+      "before": null,
+      "after": "4033dee2e9b7fce3a8147fb8322f4bcd662786dc8053ce467772460428f0eca7"
+    },
+    "tests/ui-delivery.test.cjs": {
+      "before": null,
+      "after": "7651cbed3d4f45cb1679623b7ba8bbb191395f0c5c4ca5b7a0b7dc8e97da7289"
+    },
+    "unregister_fbs_file_association.bat": {
+      "before": "834e99c806fccf7c6e79ae2e08b51b1911a03cc506b3d762a2f51c6b9cc003db",
+      "after": "e5c201a0600b560b4f5855ea73a2647b3c93252b4796169a1a2960a2687dd598"
+    }
+  }
+}
